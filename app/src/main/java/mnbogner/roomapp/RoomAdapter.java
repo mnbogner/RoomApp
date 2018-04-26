@@ -7,9 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.Collections;
 import java.util.List;
 
-public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> {
+public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> implements RoomItemTouchAdapter{
 
     private List<RoomUser> ruList;
 
@@ -40,6 +41,26 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> {
     public void addItems(List<RoomUser> ruList) {
         this.ruList = ruList;
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(ruList, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(ruList, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        ruList.remove(position);
+        notifyItemRemoved(position);
     }
 
     static class RoomHolder extends RecyclerView.ViewHolder {

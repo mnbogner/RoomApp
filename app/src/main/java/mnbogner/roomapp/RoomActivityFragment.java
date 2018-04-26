@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,10 @@ public class RoomActivityFragment extends Fragment implements View.OnClickListen
         rv.setLayoutManager(llm);
         ra = new RoomAdapter(new ArrayList<RoomUser>());
         rv.setAdapter(ra);
+
+        ItemTouchHelper.Callback callback = new RoomItemTouchCallback(ra);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(rv);
 
         final Observer<List<RoomUser>> roomObserver = new Observer<List<RoomUser>>() {
             @Override
