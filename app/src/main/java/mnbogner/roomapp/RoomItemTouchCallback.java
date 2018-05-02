@@ -11,6 +11,8 @@ public class RoomItemTouchCallback extends ItemTouchHelper.Callback {
         this.adapter = adapter;
     }
 
+    // disable swipe
+
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
@@ -18,14 +20,16 @@ public class RoomItemTouchCallback extends ItemTouchHelper.Callback {
         return makeMovementFlags(dragFlags, swipeFlags);
     }
 
+    // false switch to handles
+
     @Override
     public boolean isLongPressDragEnabled() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isItemViewSwipeEnabled() {
-        return true;
+        return false;
     }
 
     @Override

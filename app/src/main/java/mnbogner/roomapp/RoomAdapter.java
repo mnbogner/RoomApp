@@ -1,10 +1,13 @@
 package mnbogner.roomapp;
 
 import android.support.annotation.NonNull;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Collections;
@@ -13,9 +16,12 @@ import java.util.List;
 public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> implements RoomItemTouchAdapter{
 
     private List<RoomUser> ruList;
+    private RoomDragListener rdListener;
 
-    public RoomAdapter(List<RoomUser> ruList) {
+
+    public RoomAdapter(List<RoomUser> ruList, RoomDragListener rdListener) {
         this.ruList = ruList;
+        this.rdListener = rdListener;
         System.err.println("FOO - CREATE ADAPTER FOR LIST OF SIZE " + this.ruList.size());
     }
 
@@ -28,8 +34,16 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> im
     @Override
     public void onBindViewHolder(@NonNull RoomHolder holder, int position) {
         RoomUser ru = ruList.get(position);
-        holder.firstName.setText(ru.getFirstName());
-        holder.lastName.setText(ru.getLastName());
+        holder.name.setText(ru.getLastName() + ", " + ru.getFirstName());
+        holder.handle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                    rdListener.onStartDrag(holder);
+                }
+                return false;
+            }
+        });
         System.err.println("FOO - BIND HOLDER FOR POSITION " + position);
     }
 
@@ -64,13 +78,15 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> im
     }
 
     static class RoomHolder extends RecyclerView.ViewHolder {
-        private TextView firstName;
-        private TextView lastName;
+
+        private TextView name;
+        private ImageView handle;
 
         RoomHolder(View view) {
             super(view);
-            firstName = (TextView) view.findViewById(R.id.first_name);
-            lastName = (TextView) view.findViewById(R.id.last_name);
+            name = (TextView) view.findViewById(R.id.text_name);
+            handle = (ImageView) view.findViewById(R.id.handle);
+
         }
     }
 }
