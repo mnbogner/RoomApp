@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,14 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoomActivityFragment extends Fragment implements View.OnClickListener, RoomDragListener{
+public class RoomActivityFragment extends Fragment implements StorylinesDragListener{
 
-    private RoomViewModel rvm;
+    //private RoomViewModel rvm;
+    StorylinesViewModel svm;
     private RecyclerView rv;
     private LinearLayoutManager llm;
-    protected RoomAdapter ra;
+    //protected RoomAdapter ra;
+    protected StorylinesAdapter sa;
     private ItemTouchHelper touchHelper;
 
     public RoomActivityFragment() {
@@ -29,8 +32,7 @@ public class RoomActivityFragment extends Fragment implements View.OnClickListen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        rvm = new RoomViewModel(getContext());
-        rvm.init();
+        svm = new StorylinesViewModel(getContext());
     }
 
     // onresume - need to retrieve existing veiw model???
@@ -44,10 +46,10 @@ public class RoomActivityFragment extends Fragment implements View.OnClickListen
         rv = (RecyclerView) root.findViewById(R.id.room_recycler_view);
         llm = new LinearLayoutManager(getActivity());
         rv.setLayoutManager(llm);
-        ra = new RoomAdapter(new ArrayList<RoomUser>(), this);
-        rv.setAdapter(ra);
+        sa = new StorylinesAdapter(new ArrayList<Question>(), this);
+        rv.setAdapter(sa);
 
-        ItemTouchHelper.Callback callback = new RoomItemTouchCallback(ra);
+        ItemTouchHelper.Callback callback = new StorylinesTouchCallback(sa);
         touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(rv);
 
@@ -55,28 +57,48 @@ public class RoomActivityFragment extends Fragment implements View.OnClickListen
 
         // card view???  replace view holder
 
-        final Observer<List<RoomUser>> roomObserver = new Observer<List<RoomUser>>() {
-            @Override
-            public void onChanged(@Nullable final List<RoomUser> ruList) {
-                System.err.println("FOO - LIST CHANGED?");
+        final Observer<List<Story>> storyObserver = new Observer<List<Story>>() {
 
-                if (ruList != null) {
-                    ra.addItems(ruList);
+            final Observer<List<Question>> questionObserver = new Observer<List<Question>>() {
+                @Override
+                public void onChanged(@Nullable final List<Question> questionList) {
+                    if (questionList != null) {
+
+                        Log.d("FOO", "QUESTION COUNT: " + questionList.size());
+
+                        sa.addItems(questionList);
+                    }
+                }
+            };
+
+            @Override
+            public void onChanged(@Nullable final List<Story> storyList) {
+                if ((storyList != null) && (storyList.size() > 0)) {
+                    long storyId = storyList.get(0).getId();
+
+                    Log.d("FOO", "STORY ID QUERY: " + storyId);
+
+                    svm.getQuestions(storyId).observe(RoomActivityFragment.this, questionObserver);
                 }
             }
         };
 
-        rvm = new RoomViewModel(getContext());
+        /*
+        final Observer<List<Question>> questionObserver = new Observer<List<Question>>() {
+            @Override
+            public void onChanged(@Nullable final List<Question> questionList) {
+                if (questionList != null) {
+                    sa.addItems(questionList);
+                }
+            }
+        };
+        */
 
-        rvm.init();
-        rvm.getLiveUsers().observe(this, roomObserver);
+        svm = new StorylinesViewModel(getContext());
+
+        svm.getStories().observe(this, storyObserver);
 
         return root;
-    }
-
-    @Override
-    public void onClick(View v) {
-        rvm.update();
     }
 
     @Override

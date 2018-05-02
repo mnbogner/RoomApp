@@ -18,7 +18,6 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomAdapter.RoomHolder> im
     private List<RoomUser> ruList;
     private RoomDragListener rdListener;
 
-
     public RoomAdapter(List<RoomUser> ruList, RoomDragListener rdListener) {
         this.ruList = ruList;
         this.rdListener = rdListener;
